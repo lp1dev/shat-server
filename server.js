@@ -9,12 +9,6 @@ var server = net.createServer();
 
 crypt.passphrase = "this is a passphrase";
 
-//test
-
-var test_message = crypt.encrypt("test encrypted string");
-//console.log(test_message);
-console.log(crypt.decrypt("4dgy7BmSOi1YSz4Gtyvd+C8dxyDf\n"));
-
 function socket_handler(socket){
     socket.on('data', function(data){
 	console.log("Raw Data : [%s]", data.toString('utf-8'));
