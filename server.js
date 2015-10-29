@@ -11,11 +11,13 @@ crypt.passphrase = "this is a passphrase";
 
 //test
 
-console.log(crypt.decrypt(crypt.encrypt("test42 : Ok")));
+var test_message = crypt.encrypt("test encrypted string");
+//console.log(test_message);
+console.log(crypt.decrypt("4dgy7BmSOi1YSz4Gtyvd+C8dxyDf\n"));
 
 function socket_handler(socket){
     socket.on('data', function(data){
-	console.log("Raw Data : [%s]", data.toString());
+	console.log("Raw Data : [%s]", data.toString('utf-8'));
 	console.log("Decyphered Data : [%s]", crypt.decrypt(data.toString('utf-8')));
     });
 }

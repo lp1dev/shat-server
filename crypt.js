@@ -13,8 +13,12 @@ exports.encrypt = function(text) {
 }
 
 exports.decrypt = function(text) {
-    var decipher = exports.crypto.createDecipher(exports.algorithm, exports.passphrase);
-    var dec = decipher.update(text,'hex','utf8');
-    dec += decipher.final('utf8');
-    return dec;
+    var result,
+	encoded   = new Buffer(text, 'base64'),
+	decodeKey = exports.crypto.createHash('sha256').update(exports.passphrase, 'ascii').digest();
+	decipher  = exports.crypto.createDecipheriv('aes-256-ctr', decodeKey, '1234567890123456');
+    	console.log(exports.passphrase);
+    result = decipher.update(encoded);
+    result += decipher.final();
+    return result;
 }
