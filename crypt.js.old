@@ -1,0 +1,42 @@
+
+
+var exports = module.exports = {};
+
+exports.passphrase="";
+exports.iv = "";
+
+exports.crypto = require('crypto');
+exports.algorithm = 'aes-256-ctr';
+
+/*
+exports.encrypt = function(text) {
+    var decodekey = exports.crypto.createHash('sha256').update(exports.passphrase).digest('base64');
+    console.log(decodekey);
+    var encipher = exports.crypto.createCipheriv(exports.algorithm, decodekey, exports.iv),
+	encryptdata  = encipher.update(text, 'utf8', 'binary');
+    encryptdata += encipher.final('binary');
+    encode_encryptdata = new Buffer(encryptdata, 'ascii').toString('base64');
+    return encode_encryptdata;
+    }*/
+
+exports.encrypt = function(text) {
+    var cryptkey = exports.crypto.createHash('sha256').update(exports.passphrase, 'binary', 'utf-8').digest();
+    console.log(cryptkey);
+   
+    var encipher = exports.crypto.createCipheriv('aes-256-ctr', cryptkey, exports.iv),
+	encryptdata = encipher.update(text);
+    encryptdata += encipher.final('binary');
+    encode_encryptdata = new Buffer(encryptdata, 'binary').toString('base64');
+    return encode_encryptdata;
+}
+
+exports.decrypt = function(text) {
+    var result,
+	encoded = new Buffer(text, 'base64'),
+	decodeKey = exports.crypto.createHash('sha256').update(exports.passphrase, 'ascii').digest();
+    decipher  = exports.crypto.createDecipheriv(exports.algorithms, decodeKey, exports.iv);
+    console.log(exports.passphrase);
+    result = decipher.update(encoded, 'binary', 'utf8');
+    result += decipher.final('utf8');
+    return result;
+}

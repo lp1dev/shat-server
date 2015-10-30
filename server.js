@@ -7,7 +7,12 @@ var port = 8000;
 var debug = true
 var server = net.createServer();
 
-crypt.passphrase = "this is a passphrase";
+crypt.passphrase = "aaaaaaaaand this is a passphrase";
+crypt.iv = "1234567890123456";
+
+var test_message = "Test is OK";
+var encoded_message = crypt.encrypt(test_message);
+console.log(crypt.decrypt(encoded_message));
 
 function socket_handler(socket){
     socket.on('data', function(data){

@@ -1,24 +1,22 @@
-var exports = module.exports = {};
+var crypto = require('crypto');
 
-exports.passphrase="";
+var AESCrypt = module.exports = {};
 
-exports.crypto = require('crypto');
-exports.algorithm = 'aes-256-ctr';
+AESCrypt.passphrase = "";
+AESCrypt.iv = "";
 
-exports.encrypt = function(text) {
-    var cipher = exports.crypto.createCipher(exports.algorithm, exports.passphrase);
-    var crypted = cipher.update(text, 'utf8', 'hex');
-    crypted += cipher.final('hex');
-    return crypted;
+AESCrypt.decrypt = function(encryptdata) {
+    var decipher = crypto.createDecipheriv('aes-256-ctr', crypto.createHash('sha256').update(AESCrypt.passphrase).digest(), AESCrypt.iv);
+    return Buffer.concat([
+	decipher.update(encryptdata),
+	decipher.final()
+    ]);
 }
 
-exports.decrypt = function(text) {
-    var result,
-	encoded   = new Buffer(text, 'base64'),
-	decodeKey = exports.crypto.createHash('sha256').update(exports.passphrase, 'ascii').digest();
-	decipher  = exports.crypto.createDecipheriv('aes-256-ctr', decodeKey, '1234567890123456');
-    	console.log(exports.passphrase);
-    result = decipher.update(encoded);
-    result += decipher.final();
-    return result;
+AESCrypt.encrypt = function(cleardata) {
+    var encipher = crypto.createCipheriv('aes-256-ctr', crypto.createHash('sha256').update(AESCrypt.passphrase).digest(), AESCrypt.iv);
+    return Buffer.concat([
+	encipher.update(cleardata),
+	encipher.final()
+    ]);
 }
