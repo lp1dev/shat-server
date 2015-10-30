@@ -23,32 +23,56 @@ function generateRandomMessage(){
 function first_handshake(socket, data){
     var random_message = generateRandomMessage();
     var message = crypt.encrypt(JSON.stringify({hello: socket.remoteAddress ,message: crypt.encrypt(random_message)}))+"\n";
-    console.log(message);
+    socket.write(message);
     var newUser = new user.create(socket.remoteAddress);
     newUser.verify_key = random_message;
+    newUser.ip = socket.remoteAddress;
+    newUser.id = logged_clients.length;
     logged_clients.push(newUser);
 }
 
 function second_handshake(socket, data){
-    var message = "Cool\n";
-    if (JSON.parse(crypt.decrypt(data)).message == get_user(socket.remoteAddress).message)
-        socket.write(message);
+    var ip = socket.remoteAddress;
+    console.log(data);
+    console.log(get_user(socket.remoteAddress).verify_key);
+    console.log(JSON.parse(data));
+    console.log(JSON.parse(data).connection.message);
+    var json = JSON.parse(data);
+    if (json.connection.message == get_user(socket.remoteAddress).verify_key){
+	logged_clients[get_user_id(ip)].verified = true;
+	logged_clients[get_user_id(ip)].login =  JSON.parse(data).connection.login;
+	var message = crypt.encrypt(JSON.stringify(logged_clients))+"\n";
+	socket.write(message);
+	console.log("second handshake done");
+}
+}
+
+function get_user_id(ip){
+    var user = get_user(ip);
+    if (user != undefined)
+	return user.id;
+    return -1;
 }
 
 function get_user(ip){
+    console.log("get user length : %d", logged_clients.length); 
+    
     for (var i = 0; i < logged_clients.length; i++){
-        if (ip == logged_clients[i].ip)
+	console.log("user %d : %s", i, logged_clients[i].ip);
+	console.log("comparing %s with %s", ip, logged_clients[i].ip);
+        if (ip == logged_clients[i].ip){
             return logged_clients[i];
-        }
-        return undefined;
+	}
     }
+    return undefined;
+}
 
 function check_user_status(ip){
     console.log("logged_clients = %s", logged_clients.length)
-    for (var i = 0 ; i < logged_clients.length; i++){
-        console.log("logged_client[%d] = %s", i, logged_clients[i].verify_key);
-        if (ip == logged_clients[i].ip) {
-            if (logged_clients[i].verified)
+    var found_user = get_user(ip);
+    if (found_user != undefined){
+        if (ip == found_user.ip) {
+            if (found_user.verified)
                 return 2;
             else
                 return 1
@@ -58,26 +82,27 @@ function check_user_status(ip){
 }
 
 function handle_message(socket, data){
+    socket.write(crypt.encrypt("OK")+"\n");
 }
 
 function socket_handler(socket, ip){
     socket.on('data', function(data){
 	console.log("Raw Data : [%s]", data.toString('utf-8'));
-	console.log("Decyphered Data : [%s]", crypt.decrypt(data.toString('utf-8')).toString('utf-8'));
+	var decyphered_data = crypt.decrypt(data.toString('utf-8')).toString('utf-8');
+	console.log("Decyphered Data : [%s]", decyphered_data);
 	//IF not logged in already AND is not blacklisted
-        switch (check_user_status()){
+        switch (check_user_status(ip)){
             case 0:
                 console.log("IP %s is unknown", ip);
-                first_handshake(socket, data);
+                first_handshake(socket, decyphered_data);
                 break;
             case 1:
                 console.log("IP %s is not validated", ip);
-                second_handshake(socket, data);
+                second_handshake(socket, decyphered_data);
                 break;
             case 2:
                 console.log("IP %s is validated", ip);
-                handle_message(socket, data);
-
+                handle_message(socket, decyphered_data);
         }
     });
 }
