@@ -6,13 +6,19 @@ AESCrypt.passphrase = "";
 AESCrypt.iv = "";
 
 AESCrypt.decrypt = function(encryptdata) {
-    encoded = new Buffer(encryptdata, 'base64');
-    var cipheredkey = crypto.createHash('sha256').update(AESCrypt.passphrase).digest();
-    var decipher = crypto.createDecipheriv('aes-256-ctr', cipheredkey, AESCrypt.iv);
-    return Buffer.concat([
-	decipher.update(encoded),
-	decipher.final()
-    ]);
+    try{
+	encoded = new Buffer(encryptdata, 'base64');
+	var cipheredkey = crypto.createHash('sha256').update(AESCrypt.passphrase).digest();
+	var decipher = crypto.createDecipheriv('aes-256-ctr', cipheredkey, AESCrypt.iv);
+	return Buffer.concat([
+	    decipher.update(encoded),
+	    decipher.final()
+	]);
+    }
+    catch(e){
+	console.log(e.stack);
+	return "";
+    }
 }
 
 AESCrypt.encrypt = function(cleardata) {

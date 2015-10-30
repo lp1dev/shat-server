@@ -1,6 +1,9 @@
 var User = module.exports = {};
 
-function user(ip){
+User.create = function(ip){
     User.login = "";
     User.ip = ip;
+    User.verified = false;
+    User.verify_key = "";
+    return this;
 }
