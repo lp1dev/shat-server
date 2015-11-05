@@ -77,13 +77,22 @@ shatserver.handle_message = function(socket, data){
 };
 
 shatserver.initiate_connection = function(data){
-
+    var jsonMessage = JSON.parse(data);
+    var nickname;
+    var user1 = shatserver.get_user(jsonMessage.private_key);
+    var user2;
+    if ((nickname = jsonMessage.initiate_chat.nickname) != undefined) {
+        if ((user2 = shatserver.get_user_by_login(nickname)) != undefined)
+            user2.socket.write(templates.message(0), user1.login, user1.ip);
+    }
 };
 
 shatserver.get_message_type = function(data){
     var jsonMessage = JSON.parse(data);
     if (jsonMessage.logout != undefined)
         return 0;
+    if (jsonMessage.initiate_chat != undefined)
+        return 1;
 };
 
 shatserver.is_login_available = function(login){
@@ -92,13 +101,13 @@ shatserver.is_login_available = function(login){
 	    return false;
     }
     return true;
-}
+};
 
 shatserver.logout = function(private_key){
     var user = shatserver.get_user(private_key);
     if (user.id >= 0)
 	shatserver.logged_clients.splice(user.id, 1);
-}
+};
 
 shatserver.get_users_json = function(){
     var finalMessage = [];
@@ -124,5 +133,13 @@ shatserver.get_user = function(private_key){
     return undefined;
 };
 
+shatserver.get_user_by_login = function(login){
+    for (var i = 0; i < shatserver.logged_clients.length; i++){
+        if (login == shatserver.logged_clients[i].login){
+            return shatserver.logged_clients[i];
+        }
+    }
+    return undefined;
+};
 
 module.exports = shatserver;

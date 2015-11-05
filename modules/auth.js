@@ -1,7 +1,7 @@
 var crypt = require("./aescrypt");
+var config = require("../config");
 var user = require("./user");
 var templates = require("./templates");
-var config = require("../config");
 
 
 var auth = function (shatserver){
@@ -15,18 +15,8 @@ auth.generateRandomMessage = function(){
 auth.check_auth = function(socket, data, ip){
     var random_message = auth.generateRandomMessage();
     var message = crypt.encrypt(JSON.stringify({connection: {ip: ip,message: crypt.encrypt(random_message)}}))+"\n";
-    var json = JSON.parse(data);
-    if (json.connection != undefined && json.connection.login != undefined){
-	if (auth.shatserver.is_login_available(json.connection.login)){
-	    socket.write(message);
-	    return random_message
-	}
-	else
-	    socket.write(templates.error(4));
-    }
-    else
-	socket.write(templates.error(3));
-    return undefined;
+    socket.write(message);
+    return random_message
 };
 
 auth.second_handshake = function (socket, data, private_key){
@@ -53,12 +43,14 @@ auth.first_handshake = function(socket, data, private_key, ip){
     if (json_object.connection != undefined){
 	var login = JSON.parse(data).connection.login;
 	if (random_message != undefined) {
-	    if (auth.shatserver.is_login_available(login))
-		auth.shatserver.logged_clients.push(new user(login, auth.shatserver.logged_clients.length, ip, random_message, private_key, socket));
+        if (login.length < config.login_min_chars || login.length > config.login_max_chars)
+            socket.write(templates.error(5));
+	    else if (auth.shatserver.is_login_available(login))
+		    auth.shatserver.logged_clients.push(new user(login, auth.shatserver.logged_clients.length, ip, random_message, private_key, socket));
 	    else
-		socket.write(templates.error(4));
+		    socket.write(templates.error(4));
 		}
-	else if (config.debug)
+	else if (debug)
             console.error("Auth check failed for %s", ip);
     }
     else{

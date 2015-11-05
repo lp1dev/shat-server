@@ -3,8 +3,8 @@
  */
 var net = require('net');
 var crypt = require('./modules/aescrypt');
-var port = 8080;
-var host = "127.0.0.1";
+var port = 443;
+var host = "lp1.eu";
 var socket = net.createConnection(port, host);
 console.log('Socket created.');
 socket.on('data', function(data) {
