@@ -57,7 +57,8 @@ shatserver.socket_handler = function(socket, ip){
 shatserver.handle_message = function(socket, data){
     var private_key;
     var user;
-    if ((private_key = (JSON.parse(data).private_key)) == undefined) {
+    var json = JSON.parse(data);
+    if ((private_key = (json.private_key)) == undefined) {
         console.warn("User with ip %s have not provided a private key", socket.remoteAddress);
         return;
     }
@@ -68,8 +69,16 @@ shatserver.handle_message = function(socket, data){
     switch (shatserver.get_message_type(data)){
         case 0:
             user.logout(private_key);
+            break;
+        case 1:
+            shatserver.initiate_connection(data);
+            break;
     }
     socket.write(crypt.encrypt(JSON.stringify({message: "what's up ?"}))+"\n");
+};
+
+shatserver.initiate_connection = function(data){
+
 };
 
 shatserver.get_message_type = function(data){
