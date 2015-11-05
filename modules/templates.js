@@ -15,6 +15,6 @@ templates.errors = [,
 templates.messages = {};
 
 templates.error = function(code){
-  return crypt.encrypt(JSON.stringify({error:templates.errors[code]}))
+  return crypt.encrypt(JSON.stringify({error:templates.errors[code]}))+"\n"
 };
 

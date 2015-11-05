@@ -19,10 +19,4 @@ user.ping = function (user){
     user.socket.write(pingMessage);
 };
 
-user.logout = function(shatserver){
-    var user_id = shatserver.get_user_id(this.private_key);
-    if (user_id >= 0)
-        shatserver.logged_clients.splice(user_id, 1);
-};
-
 module.exports = user;

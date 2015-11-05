@@ -26,7 +26,6 @@ shatserver.socket_handler = function(socket, ip){
         console.log("Raw Data : [%s]", data.toString('utf-8'));
         var deciphered_data = crypt.decrypt(data.toString('utf-8')).toString('utf-8');
         console.log("Decyphered Data : [%s]", deciphered_data);
-        //IF not logged in already AND is not blacklisted
         try {
             var private_key = JSON.parse(deciphered_data).private_key;
         }
@@ -68,7 +67,7 @@ shatserver.handle_message = function(socket, data){
     }
     switch (shatserver.get_message_type(data)){
         case 0:
-            user.logout(private_key);
+            shatserver.logout(private_key);
             break;
         case 1:
             shatserver.initiate_connection(data);
@@ -88,11 +87,17 @@ shatserver.get_message_type = function(data){
 };
 
 shatserver.is_login_available = function(login){
-    users = shatserver.get_users_json();
-    for (var i = 0;i < users; i++)
-	if (login == users[i].login)
-	    return true;
-    return false;
+    for (var i = 0;i < shatserver.logged_clients.length; i++){
+	if (login == shatserver.logged_clients[i].login)
+	    return false;
+    }
+    return true;
+}
+
+shatserver.logout = function(private_key){
+    var user = shatserver.get_user(private_key);
+    if (user.id >= 0)
+	shatserver.logged_clients.splice(user.id, 1);
 }
 
 shatserver.get_users_json = function(){

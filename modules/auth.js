@@ -1,6 +1,7 @@
 var crypt = require("./aescrypt");
 var user = require("./user");
 var templates = require("./templates");
+var config = require("../config");
 
 
 var auth = function (shatserver){
@@ -14,8 +15,18 @@ auth.generateRandomMessage = function(){
 auth.check_auth = function(socket, data, ip){
     var random_message = auth.generateRandomMessage();
     var message = crypt.encrypt(JSON.stringify({connection: {ip: ip,message: crypt.encrypt(random_message)}}))+"\n";
-    socket.write(message);
-    return random_message
+    var json = JSON.parse(data);
+    if (json.connection != undefined && json.connection.login != undefined){
+	if (auth.shatserver.is_login_available(json.connection.login)){
+	    socket.write(message);
+	    return random_message
+	}
+	else
+	    socket.write(templates.error(4));
+    }
+    else
+	socket.write(templates.error(3));
+    return undefined;
 };
 
 auth.second_handshake = function (socket, data, private_key){
@@ -47,7 +58,7 @@ auth.first_handshake = function(socket, data, private_key, ip){
 	    else
 		socket.write(templates.error(4));
 		}
-	else if (debug)
+	else if (config.debug)
             console.error("Auth check failed for %s", ip);
     }
     else{
