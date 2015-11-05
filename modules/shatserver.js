@@ -78,6 +78,14 @@ shatserver.get_message_type = function(data){
         return 0;
 };
 
+shatserver.is_login_available = function(login){
+    users = shatserver.get_users_json();
+    for (var i = 0;i < users; i++)
+	if (login == users[i].login)
+	    return true;
+    return false;
+}
+
 shatserver.get_users_json = function(){
     var finalMessage = [];
     for (var i = 0; i < shatserver.logged_clients.length; i++) {

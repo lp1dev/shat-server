@@ -6,8 +6,10 @@ var crypt = require("./aescrypt");
 
 
 templates.errors = [,
-    {code:1, message: "You must provide a private key"},
-    {code:2, message: "Second handshake failed"}
+		    {code:1, message: "You must provide a private key"},
+		    {code:2, message: "Second handshake failed"},
+		    {code:3, message: "JSON message must contain a 'connection' field"},
+		    {code:4, message: "Login is already taken"}
 ];
 
 templates.messages = {};

@@ -38,12 +38,21 @@ auth.second_handshake = function (socket, data, private_key){
 
 auth.first_handshake = function(socket, data, private_key, ip){
     var random_message = auth.check_auth(socket, data, private_key);
-    var login = JSON.parse(data).connection.login;
-    if (random_message != undefined) {
-        auth.shatserver.logged_clients.push(new user(login, auth.shatserver.logged_clients.length, ip, random_message, private_key, socket));
+    var json_object = JSON.parse(data);
+    if (json_object.connection != undefined){
+	var login = JSON.parse(data).connection.login;
+	if (random_message != undefined) {
+	    if (auth.shatserver.is_login_available(login))
+		auth.shatserver.logged_clients.push(new user(login, auth.shatserver.logged_clients.length, ip, random_message, private_key, socket));
+	    else
+		socket.write(templates.error(4));
+		}
+	else if (debug)
+            console.error("Auth check failed for %s", ip);
     }
-    else if (debug)
-        console.error("Auth check failed for %s", ip);
+    else{
+	socket.write(templates.error(3));
+    }
 };
 
 auth.check_user_status = function(private_key){
