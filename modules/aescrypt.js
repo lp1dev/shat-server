@@ -1,6 +1,6 @@
 var aescrypt = module.exports = {};
 var crypto = require('crypto');
-var config = require("./config");
+var config = require("../config");
 
 aescrypt.decrypt = function(encryptdata) {
     try{
